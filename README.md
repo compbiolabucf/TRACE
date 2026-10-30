@@ -31,16 +31,7 @@ python -m pip install -e .
 trace-train --config configs/config.yaml
 ```
 
-TRACE automatically uses CUDA when available and otherwise runs on CPU. A short end-to-end check can be run with:
-
-```bash
-trace-train --config configs/config.yaml \
-  --set n_epochs=2 \
-  --set pseudo_spot_simulation_paras.spot_num=100 \
-  --set progress.enabled=false
-```
-
-The default run writes predictions, metrics, the model checkpoint, selected marker genes, and plots under `outputs/SMA-ME3/seed-6077/`.
+TRACE automatically uses CUDA when available and otherwise runs on CPU.
 
 ## Configuration and inputs
 
