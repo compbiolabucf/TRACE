@@ -8,7 +8,7 @@ import pandas as pd
 import scanpy as sc
 from scipy import sparse
 
-from io_utils import load_trace_inputs
+from .io_utils import load_trace_inputs
 
 
 def _transform_expression(adata, normalize=True, log=True):

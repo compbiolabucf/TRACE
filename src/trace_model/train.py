@@ -12,13 +12,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from tqdm.auto import trange
 
-from preprocess import preprocess_trace
-from io_utils import REQUIRED_PATH_KEYS
-from adjacency import build_graphs_and_edges
-from models import TRACE
-from losses import vae_loss
-from metrics import evaluate_all
-from plotting import draw_spatial_pies, resolve_celltype_colors
+from .preprocess import preprocess_trace
+from .io_utils import REQUIRED_PATH_KEYS
+from .adjacency import build_graphs_and_edges
+from .models import TRACE
+from .losses import vae_loss
+from .metrics import evaluate_all
+from .plotting import draw_spatial_pies, resolve_celltype_colors
 
 
 def seed_everything(seed, deterministic=True):
@@ -74,7 +74,9 @@ def apply_config_overrides(cfg, overrides):
 
 def main():
     parser = argparse.ArgumentParser(description="Train TRACE using its YAML config.")
-    parser.add_argument("--config", "-c", default="config.yaml", help="Path to YAML config file.")
+    parser.add_argument(
+        "--config", "-c", default="configs/config.yaml", help="Path to YAML config file."
+    )
     parser.add_argument(
         "--set",
         dest="overrides",

@@ -1,69 +1,60 @@
 # TRACE
 
-<img src="figure/TRACE.png">
+![TRACE model diagram](docs/TRACE_architecture.png)
 
-TRACE is a graph-based variational autoencoder for spatial transcriptomics cell-type deconvolution. It builds a sparse graph over measured spatial spots and simulated pseudo-spots, encodes their expression profiles with graph convolutions, and predicts a cell-type proportion for each spot using single-cell reference profiles. The included SMA-ME3 dataset provides an end-to-end example.
+TRACE is a graph-based variational autoencoder for spatial transcriptomics cell-type deconvolution. It builds a sparse graph over measured spots and simulated pseudo-spots, encodes expression profiles with graph convolutions, and predicts a cell-type proportion for each spot from single-cell reference profiles.
 
-## Contents
+## Repository layout
 
 ```text
 TRACE/
-├── data/SMA-ME3/
-│   ├── spot_expression.parquet      # Spot × gene raw counts
-│   ├── spot_coordinates.parquet     # Spot × x/y coordinates
-│   ├── cell_expression.parquet      # Reference cell × gene raw counts
-│   ├── celltype_labels.parquet      # Reference cell × cell-type label
-│   └── spot_ground_truth.parquet    # Optional evaluation truth
-├── config.yaml                      # SMA-ME3 run configuration
-├── train.py                         # Training and evaluation entry point
-├── preprocess.py                    # Model preprocessing
-├── io_utils.py                      # Strict Parquet input validation
-├── adjacency.py                     # Sparse graph construction
-├── models.py                        # TRACE graph VAE
-├── losses.py                        # Training objective
-├── metrics.py                       # Proportion evaluation metrics
-├── plotting.py                      # Spatial proportion plot
-├── requirements.txt
-└── outputs/                         # Default run output directory
+├── configs/                 # Run configuration
+├── data/SMA-ME3/            # Packaged SMA-ME3 input tables
+├── docs/                    # Model diagram and data notes
+├── outputs/                 # Generated run results
+├── src/trace_model/         # TRACE implementation
+├── pyproject.toml           # Python package and CLI entry point
+└── requirements.txt         # Runtime dependencies
 ```
+
+The four required SMA-ME3 inputs are stored separately as Parquet tables:
+
+- `spot_expression.parquet`: 521 spots × 351 genes.
+- `spot_coordinates.parquet`: x/y coordinates for those 521 spots.
+- `cell_expression.parquet`: 11,169 reference cells × the same 351 genes.
+- `celltype_labels.parquet`: one label for each reference cell.
+
+`spot_ground_truth.parquet` is a separate optional evaluation file with proportions for 23 cell types. TRACE does not use it during fitting. The inputs contain raw counts; preprocessing performs library-size normalization and log transformation.
 
 ## Install and run
 
-Python 3.10 or newer is recommended. Install a PyTorch build appropriate for your CPU/CUDA environment, then install the dependencies and run the included config:
+Python 3.10 or newer is recommended. Install a PyTorch build appropriate for your CPU/CUDA environment, then install the dependencies and TRACE package:
 
 ```bash
-cd ./TRACE
+cd /data2/alif/sp_vae_gcn/github/TRACE
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
-python train.py --config config.yaml
+python -m pip install -e .
+trace-train --config configs/config.yaml
 ```
 
-TRACE automatically uses CUDA when it is available and otherwise runs on CPU. A short end-to-end check can be run with:
+TRACE automatically uses CUDA when available and otherwise runs on CPU. A short end-to-end check can be run with:
 
 ```bash
-python train.py --config config.yaml \
+trace-train --config configs/config.yaml \
   --set n_epochs=2 \
   --set pseudo_spot_simulation_paras.spot_num=100 \
   --set progress.enabled=false
 ```
 
-Run outputs are written under `outputs/SMA-ME3/seed-6077/`. They include predicted spot proportions, evaluation metrics when the optional truth file is configured, the trained model checkpoint, selected marker genes, a loss plot, and a spatial pie plot.
+The default run writes predictions, metrics, the model checkpoint, selected marker genes, and plots under `outputs/SMA-ME3/seed-6077/`.
 
-## Input files
+## Configuration and inputs
 
-TRACE reads Parquet files only. The four required files remain separate:
+Edit [`configs/config.yaml`](configs/config.yaml) to set the four required input paths, optional truth path, model settings, graph settings, and output directory. TRACE accepts Parquet files only. Every expression table must be a numeric spot/cell-by-gene matrix with unique IDs and genes; the spot and reference matrices must have the same ordered genes. Coordinates must contain `x` and `y` columns and match spot IDs and order. Cell labels must contain one `cell_type` column and match reference cell IDs and order.
 
-- `spot_expression_file`: spot-by-gene raw integer counts.
-- `spot_coordinates_file`: the same spot IDs in the same row order, with columns named `x` and `y`.
-- `cell_expression_file`: reference cell-by-gene raw integer counts, with the same ordered genes as the spot matrix.
-- `celltype_labels_file`: one `cell_type` column, indexed in the same order as the reference cell matrix.
+Paths in the config are resolved relative to the config file, so the included `../data/...` and `../outputs/...` paths work when the package is run from the repository root.
 
-The optional `spot_ground_truth_file` contains spot-by-cell-type proportions and is used only for post-training evaluation. It is not used to fit TRACE. All five paths are shown in `config.yaml`; change them to use a different dataset. Keep expression files as raw counts because TRACE performs library-size normalization and log transformation during preprocessing.
-
-All tables use their observation IDs as the Parquet index, preserving spot/cell alignment and gene names without additional sidecar files.
-
-## SMA-ME3 example data
-
-The included processed SMA-ME3 files contain 521 spatial spots, 11,169 reference single cells, 351 shared genes, and 23 cell types.
+The `loss_kl_lat` coefficient is set to `0.0001`, a small latent KL regularization weight.

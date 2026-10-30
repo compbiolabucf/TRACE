@@ -1,12 +1,12 @@
 # TRACE configuration for the packaged SMA-ME3 dataset.
 paths:
-  spot_expression_file: "./data/SMA-ME3/spot_expression.parquet"
-  spot_coordinates_file: "./data/SMA-ME3/spot_coordinates.parquet"
-  cell_expression_file: "./data/SMA-ME3/cell_expression.parquet"
-  celltype_labels_file: "./data/SMA-ME3/celltype_labels.parquet"
+  spot_expression_file: "../data/SMA-ME3/spot_expression.parquet"
+  spot_coordinates_file: "../data/SMA-ME3/spot_coordinates.parquet"
+  cell_expression_file: "../data/SMA-ME3/cell_expression.parquet"
+  celltype_labels_file: "../data/SMA-ME3/celltype_labels.parquet"
   # Evaluation only; this is never passed to TRACE during fitting.
-  spot_ground_truth_file: "./data/SMA-ME3/spot_ground_truth.parquet"
-  output_path: "./outputs/SMA-ME3"
+  spot_ground_truth_file: "../data/SMA-ME3/spot_ground_truth.parquet"
+  output_path: "../outputs/SMA-ME3"
 
 run:
   name: "seed-{seed}"
