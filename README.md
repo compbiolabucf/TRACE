@@ -31,7 +31,7 @@ The four required SMA-ME3 inputs are stored separately as Parquet tables:
 Python 3.10 or newer is recommended. Install a PyTorch build appropriate for your CPU/CUDA environment, then install the dependencies and TRACE package:
 
 ```bash
-cd /data2/alif/sp_vae_gcn/github/TRACE
+cd TRACE
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
@@ -54,7 +54,3 @@ The default run writes predictions, metrics, the model checkpoint, selected mark
 ## Configuration and inputs
 
 Edit [`configs/config.yaml`](configs/config.yaml) to set the four required input paths, optional truth path, model settings, graph settings, and output directory. TRACE accepts Parquet files only. Every expression table must be a numeric spot/cell-by-gene matrix with unique IDs and genes; the spot and reference matrices must have the same ordered genes. Coordinates must contain `x` and `y` columns and match spot IDs and order. Cell labels must contain one `cell_type` column and match reference cell IDs and order.
-
-Paths in the config are resolved relative to the config file, so the included `../data/...` and `../outputs/...` paths work when the package is run from the repository root.
-
-The `loss_kl_lat` coefficient is set to `0.0001`, a small latent KL regularization weight.
