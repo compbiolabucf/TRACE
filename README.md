@@ -17,15 +17,6 @@ TRACE/
 └── requirements.txt         # Runtime dependencies
 ```
 
-The four required SMA-ME3 inputs are stored separately as Parquet tables:
-
-- `spot_expression.parquet`: 521 spots × 351 genes.
-- `spot_coordinates.parquet`: x/y coordinates for those 521 spots.
-- `cell_expression.parquet`: 11,169 reference cells × the same 351 genes.
-- `celltype_labels.parquet`: one label for each reference cell.
-
-`spot_ground_truth.parquet` is a separate optional evaluation file with proportions for 23 cell types. TRACE does not use it during fitting. The inputs contain raw counts; preprocessing performs library-size normalization and log transformation.
-
 ## Install and run
 
 Python 3.10 or newer is recommended. Install a PyTorch build appropriate for your CPU/CUDA environment, then install the dependencies and TRACE package:
