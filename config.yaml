@@ -1,0 +1,96 @@
+# TRACE configuration for the packaged SMA-ME3 dataset.
+paths:
+  spot_expression_file: "./data/SMA-ME3/spot_expression.parquet"
+  spot_coordinates_file: "./data/SMA-ME3/spot_coordinates.parquet"
+  cell_expression_file: "./data/SMA-ME3/cell_expression.parquet"
+  celltype_labels_file: "./data/SMA-ME3/celltype_labels.parquet"
+  # Evaluation only; this is never passed to TRACE during fitting.
+  spot_ground_truth_file: "./data/SMA-ME3/spot_ground_truth.parquet"
+  output_path: "./outputs/SMA-ME3"
+
+run:
+  name: "seed-{seed}"
+  seed_mode: fixed
+  seed: 6077
+  deterministic: true
+
+find_marker_genes_paras:
+  preprocess: true
+  normalize: true
+  log: true
+  top_gene_per_type: 100
+
+pseudo_spot_simulation_paras:
+  spot_num: 2000
+  min_cell_num_in_spot: 1
+  max_cell_num_in_spot: 4
+  max_cell_types_in_spot: 4
+
+data_normalization_paras:
+  normalize: true
+  log: true
+
+features:
+  # TRACE v4 scales the combined real and pseudo expression feature matrix.
+  scale: true
+
+options:
+  device: auto
+  torch_num_threads: 4
+  n_jobs: 4
+  max_pseudo_spots: 100000
+
+graph:
+  backend: sparse
+  alpha_spatial: 1.0
+  alpha_expr_real: 1.0
+  alpha_expr_pseudo: 1.0
+  alpha_cross: 1.0
+  k_real: 10
+  k_pseudo: 10
+  k_cross_real_to_pseudo: 10
+  k_cross_pseudo_to_real: 10
+  expr_thresh: 0.0
+  mutual_knn: true
+  adjacency_sigma: 0.0  # Estimate the spatial scale from nearest-neighbor distances.
+  n_jobs: 4
+
+val_size: 0.1
+
+hidden_dim: 128
+latent_dim: 32
+tau: 0.5
+dropout_rate: 0.2
+
+n_epochs: 500
+lr: 0.0001
+l2_lambda: 0.0001
+loss_recon: 0.0
+# Small latent KL regularization weight.
+loss_kl_lat: 0.0001
+loss_kl_mix: 5.0
+loss_smooth: 0.0
+loss_ent: -0.001
+loss_align: 0.0
+loss_l1: 0.0
+
+export:
+  save_real_latent_mu: true
+  save_real_spot_names: true
+  real_latent_mu_filename: "real_spot_latent_mu.pkl"
+  real_spot_names_filename: "real_spot_names.pkl"
+  predicted_proportions_filename: "predicted_proportions.csv"
+
+plot:
+  enabled: true
+  filename: "TRACE_spatial_celltype_proportions.png"
+  title: "TRACE predicted cell-type proportions"
+  show_legend: true
+  legend_columns: 3
+  legend_fontsize: 8
+  legend_title_fontsize: 12
+  radius_scale: 0.45
+  invert_y: true
+
+progress:
+  enabled: true
